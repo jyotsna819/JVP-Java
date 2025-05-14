@@ -1,0 +1,38 @@
+import java.util.*;
+
+public class GroupAndSortOwners {
+
+    public static Map<String, List<String>> groupAndSortOwners(Map<String, String> fileToOwner) {
+        Map<String, List<String>> ownerToFiles = new HashMap<>();
+
+        // Group files by owner
+        for (Map.Entry<String, String> entry : fileToOwner.entrySet()) {
+            String file = entry.getKey();
+            String owner = entry.getValue();
+
+            ownerToFiles.computeIfAbsent(owner, k -> new ArrayList<>()).add(file);
+        }
+
+        // Sort the list of files for each owner
+        for (List<String> files : ownerToFiles.values()) {
+            Collections.sort(files);
+        }
+
+        return ownerToFiles;
+    }
+
+    public static void main(String[] args) {
+        Map<String, String> fileToOwner = new HashMap<>();
+        fileToOwner.put("Input.txt", "Albert");
+        fileToOwner.put("Code.py", "Stan");
+        fileToOwner.put("Output.txt", "Albert");
+        fileToOwner.put("btech.txt", "Albert");
+
+        Map<String, List<String>> result = groupAndSortOwners(fileToOwner);
+
+        // Print the result
+        for (Map.Entry<String, List<String>> entry : result.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+    }
+}

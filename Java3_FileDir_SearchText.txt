@@ -1,0 +1,87 @@
+Q. Write a program to
+a. Read two arguments from command line :
+i. File directory path
+ii. Search text
+b. Recursively traverse all directories and files and print name of file and count of
+search text within that file
+(Note:- Program should use Java concurrency API
+(java.util.concurrent.ExecutorService) for parallel processing of file search)
+
+
+
+======================================
+
+import java.io.*;
+import java.util.concurrent.*;
+import java.util.*;
+import java.nio.file.*;
+
+public class Java3 {
+
+    private static final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+    public static void main(String[] args) throws InterruptedException {
+        if (args.length < 2) {
+            System.out.println("Usage: java FileSearchParallel <directory-path> <search-text>");
+            return;
+        }
+
+        String dirPath = args[0];
+        String searchText = args[1];
+        File root = new File(dirPath);
+
+        if (!root.exists() || !root.isDirectory()) {
+            System.out.println("Invalid directory path: " + dirPath);
+            return;
+        }
+
+        List<Future<?>> futures = new ArrayList<>();
+        traverseAndSubmit(root, searchText, futures);
+
+        // Wait for all tasks to finish
+        for (Future<?> future : futures) {
+            try {
+                future.get(); // block until task is done
+            } catch (ExecutionException e) {
+                System.err.println("Error while processing file: " + e.getMessage());
+            }
+        }
+
+        executor.shutdown();
+        executor.awaitTermination(1, TimeUnit.MINUTES);
+    }
+
+    private static void traverseAndSubmit(File dir, String searchText, List<Future<?>> futures) {
+        File[] files = dir.listFiles();
+        if (files == null) return;
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                traverseAndSubmit(file, searchText, futures);
+            } else if (file.isFile()) {
+                futures.add(executor.submit(() -> searchInFile(file, searchText)));
+            }
+        }
+    }
+
+    private static void searchInFile(File file, String searchText) {
+        int count = 0;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                int index = -1;
+                while ((index = line.indexOf(searchText, index + 1)) != -1) {
+                    count++;
+                }
+            }
+
+            if (count > 0) {
+                System.out.println("File: " + file.getAbsolutePath() + " | Count: " + count);
+            }
+
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + file.getAbsolutePath() + " - " + e.getMessage());
+        }
+    }
+}

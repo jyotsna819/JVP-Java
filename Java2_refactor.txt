@@ -1,0 +1,81 @@
+public class Java2 {
+
+    public static class TextInputBuilder {
+        protected StringBuilder value = new StringBuilder();
+
+        public void add(char c) {
+            value.append(c);
+        }
+
+        public String getValue() {
+            return value.toString();
+        }
+    }
+
+    public static class NumericInputBuilder extends TextInputBuilder {
+        @Override
+        public void add(char c) {
+            if (Character.isDigit(c)) {
+                value.append(c);
+            }
+        }
+    }
+
+    public static class OddNumericInputBuilder extends NumericInputBuilder {
+        @Override
+        public void add(char c) {
+            if (Character.isDigit(c)) {
+                int digit = c - '0';
+                if (digit % 2 == 1) {
+                    value.append(c);
+                }
+            }
+        }
+    }
+
+    public static class EvenNumericInputBuilder extends NumericInputBuilder {
+        @Override
+        public void add(char c) {
+            if (Character.isDigit(c)) {
+                int digit = c - '0';
+                if (digit % 2 == 0) {
+                    value.append(c);
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println("TextInputBuilder:");
+        TextInputBuilder textInput = new TextInputBuilder();
+        textInput.add('1');
+        textInput.add('a');
+        textInput.add('0');
+        System.out.println(textInput.getValue()); // Output: 1a0
+
+        System.out.println("NumericInputBuilder:");
+        TextInputBuilder numericInput = new NumericInputBuilder();
+        numericInput.add('1');
+        numericInput.add('a');
+        numericInput.add('0');
+        System.out.println(numericInput.getValue()); // Output: 10
+
+        System.out.println("OddNumericInputBuilder:");
+        TextInputBuilder oddInput = new OddNumericInputBuilder();
+        oddInput.add('1');
+        oddInput.add('2');
+        oddInput.add('3');
+        oddInput.add('x');
+        oddInput.add('9');
+        System.out.println(oddInput.getValue()); // Output: 139
+
+        System.out.println("EvenNumericInputBuilder:");
+        TextInputBuilder evenInput = new EvenNumericInputBuilder();
+        evenInput.add('1');
+        evenInput.add('2');
+        evenInput.add('4');
+        evenInput.add('z');
+        evenInput.add('8');
+        System.out.println(evenInput.getValue()); // Output: 248
+    }
+}
